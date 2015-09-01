@@ -121,14 +121,75 @@
   
   Drupal.behaviors.edoweb_drupal_image_viewer = {
     attach: function (context, settings) {
+      
+      // Prepare Service
+      var serviceUrl = "http://ellinet-dev.hbz-nrw.de:9090/deepzoom/api/getDzi?imageUrl=";
+      var callbackString = "&callback=?";
+      var imageUrl = null;
+      var viewer = null;
+
       $('.field-item[property:dc-format]:contains("image")'){
 	alert($(this));
 	var thumb = $(this).parent().parent().find('.thumb a');
 	var imageUrl = thumb.attr('href');
 	alert(imageUrl);
-      }
-    }
+	thumb.parent().parent().append('<div class="viewer" id="osd_view" style="width: 800px; height: 600px; background:#ccc;"></div>');
+	
+	  
+	$('#osd_view').dialog({
+	  modal: true,
+	  autoOpen: false,
+	  height: ($(window).height() - 60),
+	  width: ($(window).width() - 60),
+	  buttons: {
+	    Ok: function() {
+	      $( this ).dialog( "close" );
+	    }
+	  }
+	});
+	  
+	thumb.click(function(){
+	  $("#osd_view").dialog("open");
+	    deepZoomService();
+	  return false;
+	});
+  
+	function deepZoomService (){
+
+	  var url = serviceUrl + imageUrl + callbackString;
+	  $.getJSON(url, function(json){
+	    tileSourcesFn = json;
+	    if(viewer){
+	      viewer.destroy();
+	    }
+        
+	    viewer = OpenSeadragon({
+	      id: "osd_view",
+	      prefixUrl: "../OSimages/",
+	      tileSources: {
+		Image: {
+		  xmlns:    "http://schemas.microsoft.com/deepzoom/2008",
+		  Url: tileSourcesFn.Url + "/",
+		  Format:   tileSourcesFn.Format, 
+		  Overlap:  tileSourcesFn.Overlap, 
+		  TileSize: tileSourcesFn.TileSize,
+		  Size: {
+		    Height: tileSourcesFn.Size.Height,
+		    Width:  tileSourcesFn.Size.Width
+		  }
+        		  
+		}
+	      },
+	      showNavigator: "true",
+	    });
+        
+	  });
+
+	  
+      };
+    }  
   };
+  
   //Drupal.behaviors.edoweb_drupal_theme_datepicker = {
   //  attach: function (context, settings) {
   //    // datepicker
