@@ -118,7 +118,17 @@
       });
     }
   };
-
+  
+  Drupal.behaviors.edoweb_drupal_image_viewer = {
+    attach: function (context, settings) {
+      $('.field-item[property:dc-format]:contains("image")'){
+	alert($(this));
+	var thumb = $(this).parent().parent().find('.thumb a');
+	var imageUrl = thumb.attr('href');
+	alert(imageUrl);
+      }
+    }
+  };
   //Drupal.behaviors.edoweb_drupal_theme_datepicker = {
   //  attach: function (context, settings) {
   //    // datepicker
